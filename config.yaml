@@ -1,0 +1,38 @@
+sources:
+  chinook:
+    database: chinook
+    host: localhost
+    kind: postgres
+    password: ${DB_PASSWORD}
+    port: 5432
+    user: awaiskamran
+tools:
+  chinook_describe_table:
+    description: Describe columns in a table of chinook
+    kind: postgres-sql
+    parameters:
+    - description: Name of table to inspect
+      name: table
+      type: string
+    source: chinook
+    statement: SELECT column_name, data_type FROM information_schema.columns WHERE
+      table_name = $1;
+  chinook_execute_query:
+    description: Execute arbitrary SQL on chinook
+    kind: postgres-sql
+    parameters:
+    - description: SQL query string to run
+      name: query
+      type: string
+    source: chinook
+    statement: $1
+  chinook_list_tables:
+    description: List tables in chinook
+    kind: postgres-sql
+    source: chinook
+    statement: SELECT table_name FROM information_schema.tables WHERE table_schema='public';
+toolsets:
+  chinook_toolset:
+  - chinook_list_tables
+  - chinook_describe_table
+  - chinook_execute_query
