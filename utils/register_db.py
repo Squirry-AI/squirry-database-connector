@@ -6,20 +6,10 @@ from sqlalchemy import create_engine, inspect
 from sqlalchemy.engine import make_url
 from pathlib import Path
 from dotenv import load_dotenv
+from helpers import infer_kind_from_url, normalize_url
+from constants import POSTGRES
 
 load_dotenv()
-
-def infer_kind_from_url(url):
-    if url.startswith("postgresql://"):
-        return "postgres"
-    if url.startswith("mysql://"):
-        return "mysql"
-    raise ValueError(f"Unsupported DB dialect in URL: {url}")
-
-def normalize_url(url: str) -> str:
-    if url.startswith("postgres://"):
-        return url.replace("postgres://", "postgresql://", 1)
-    return url
 
 def register_database(tools_yaml_path: str, db_key: str, connection_url: str):
     connection_url = normalize_url(connection_url)
@@ -36,7 +26,7 @@ def register_database(tools_yaml_path: str, db_key: str, connection_url: str):
     source_config = {
         "kind": kind,
         "host": parsed.host,
-        "port": parsed.port or (5432 if kind == "postgres" else None),
+        "port": parsed.port or (5432 if kind == POSTGRES else None),
         "database": parsed.database,
         "user": parsed.username,
     }
