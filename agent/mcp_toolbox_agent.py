@@ -18,9 +18,9 @@ def get_llm():
     api_key = os.getenv("GOOGLE_API_KEY")
     if api_key:
         from google.adk.models import Gemini
-        return Gemini(model_name="gemini‑2.0‑flash", api_key=api_key)
-    print("⚠️ GOOGLE_API_KEY not set — using fallback model string.")
-    return "gemini‑2.0‑flash"
+        return Gemini(model_name="gemini-2.5-pro", api_key=api_key)
+    print("GOOGLE_API_KEY not set — using fallback model string.")
+    return "gemini-2.5-flash"
 
 async def interaction_loop(runner: Runner):
     print("\nAgent ready. Type your question or 'exit' to quit.")
@@ -35,9 +35,11 @@ async def interaction_loop(runner: Runner):
 
         async for ev in runner.run_async(new_message=msg, user_id=USER_ID, session_id=SESSION_ID):
             for fc in ev.get_function_calls():
-                print(f"🧰 Tool call: {fc.name} args={fc.args}")
+                print(f"Tool call: {fc.name} args={fc.args}")
+
             for fr in ev.get_function_responses():
-                print(f"🔧 Response from {fr.name}:\n{fr.response}")
+                print(f"Response from {fr.name}:\n{fr.response}")
+                
             if ev.content and ev.is_final_response():
                 final_text = ev.content.parts[0].text
 
@@ -54,9 +56,11 @@ async def build_runner_and_client():
         model=get_llm(),
         tools=tools,
         instruction=(
-            "You are a multi‑DB text‑to‑SQL agent. Use only these tools: "
+            "You are a multi-DB text-to-SQL agent. Use only these tools: "
             "<db_key>_list_tables, <db_key>_describe_table, <db_key>_execute_query. "
-            "Always inspect schema before querying, avoid raw user‑provided SQL."
+            "Always inspect schema before executing querying, first get all correct table names and column names as per the schema, then use those to construct your SQL queries. "
+            "avoid raw user-provided SQL."
+            'Wrap column names and table names with commas e.g Album should become "Album"'
         )
     )
     runner = Runner(app_name=APP_NAME, agent=agent, session_service=session)
@@ -69,12 +73,12 @@ async def main():
         while True:
             try:
                 runner, client = await build_runner_and_client()
-                print("✅ Agent initialized and connected to MCP Toolbox.")
+                print("Agent initialized and connected to MCP Toolbox.")
                 await interaction_loop(runner)
                 break
             except ServerDisconnectedError:
                 retry += 1
-                print(f"🔌 Disconnected—retry #{retry} in 1s...")
+                print(f"Disconnected—retry #{retry} in 1s...")
                 await asyncio.sleep(1)
             except Exception as e:
                 print("Unexpected error:", e)

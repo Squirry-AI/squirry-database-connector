@@ -32,14 +32,20 @@ def register_database(tools_yaml_path: str, db_key: str, connection_url: str):
 
     tools_yaml = Path(tools_yaml_path)
     config = yaml.safe_load(tools_yaml.read_text()) if tools_yaml.exists() else {}
-    config.setdefault("sources", {})[db_key] = {
+    # Build source config
+    source_config = {
         "kind": kind,
         "host": parsed.host,
         "port": parsed.port or (5432 if kind == "postgres" else None),
         "database": parsed.database,
         "user": parsed.username,
-        "password": "${DB_PASSWORD}",
     }
+    
+    # Only add password if it exists in the URL or environment
+    if parsed.password or os.getenv("DB_PASSWORD"):
+        source_config["password"] = parsed.password or "${DB_PASSWORD}"
+    
+    config.setdefault("sources", {})[db_key] = source_config
 
     cfg_tools = config.setdefault("tools", {})
     cfg_tools[f"{db_key}_list_tables"] = {
@@ -72,17 +78,9 @@ def register_database(tools_yaml_path: str, db_key: str, connection_url: str):
     }
 
     cfg_tools[f"{db_key}_execute_query"] = {
-        "kind": f"{kind}-sql",
+        "kind": f"{kind}-execute-sql",
         "source": db_key,
-        "description": f"Execute arbitrary SQL on {db_key}",
-        "parameters": [
-            {
-                "name": "query",
-                "type": "string",
-                "description": "SQL query string to run"
-            }
-        ],
-        "statement": "$1"
+        "description": f"Execute arbitrary SQL on {db_key} within the 'sql' parameter"
     }
 
     toolsets = config.setdefault("toolsets", {})
