@@ -6,7 +6,7 @@ from sqlalchemy import create_engine, inspect
 from sqlalchemy.engine import make_url
 from pathlib import Path
 from dotenv import load_dotenv
-from helpers import infer_kind_from_url, normalize_url
+from helpers import get_describe_table_statement, get_list_tables_statement, get_password_environment_variable, infer_kind_from_url, infer_port, normalize_url
 from constants import POSTGRES
 
 load_dotenv()
@@ -19,21 +19,21 @@ def register_database(tools_yaml_path: str, db_key: str, connection_url: str):
 
     parsed = make_url(connection_url)
     kind = infer_kind_from_url(connection_url)
+    port = parsed.port or infer_port(kind)
 
     tools_yaml = Path(tools_yaml_path)
     config = yaml.safe_load(tools_yaml.read_text()) if tools_yaml.exists() else {}
+    
     # Build source config
     source_config = {
         "kind": kind,
         "host": parsed.host,
-        "port": parsed.port or (5432 if kind == POSTGRES else None),
+        "port": port,
         "database": parsed.database,
         "user": parsed.username,
     }
     
-    # Only add password if it exists in the URL or environment
-    if parsed.password or os.getenv("DB_PASSWORD"):
-        source_config["password"] = parsed.password or "${DB_PASSWORD}"
+    source_config["password"] = f"{get_password_environment_variable(kind)}"
     
     config.setdefault("sources", {})[db_key] = source_config
 
@@ -42,11 +42,7 @@ def register_database(tools_yaml_path: str, db_key: str, connection_url: str):
         "kind": f"{kind}-sql",
         "source": db_key,
         "description": f"List tables in {db_key}",
-        "statement": (
-            "SELECT table_name "
-            "FROM information_schema.tables "
-            "WHERE table_schema='public';"
-        )
+        "statement": get_list_tables_statement(kind)
     }
 
     cfg_tools[f"{db_key}_describe_table"] = {
@@ -60,11 +56,7 @@ def register_database(tools_yaml_path: str, db_key: str, connection_url: str):
                 "description": "Name of table to inspect"
             }
         ],
-        "statement": (
-            "SELECT column_name, data_type "
-            "FROM information_schema.columns "
-            "WHERE table_name = $1;"
-        )
+        "statement": get_describe_table_statement(kind)
     }
 
     cfg_tools[f"{db_key}_execute_query"] = {
@@ -84,8 +76,16 @@ def register_database(tools_yaml_path: str, db_key: str, connection_url: str):
     print(f"Registered '{db_key}' successfully; found tables: {tables}")
 
 if __name__ == "__main__":
+    # Register PostgreSQL database
     register_database(
         os.getenv("TOOLS_YAML_PATH"),
-        os.getenv("DB_KEY"),
-        os.getenv("CONNECTION_URL")
+        os.getenv("DB_KEY_POSTGRES"),
+        os.getenv("CONNECTION_URL_POSTGRES")
     )
+
+    # Register MySQL database
+    # register_database(
+    #     os.getenv("TOOLS_YAML_PATH"),
+    #     os.getenv("DB_KEY_MYSQL"),
+    #     os.getenv("CONNECTION_URL_MYSQL")
+    # )

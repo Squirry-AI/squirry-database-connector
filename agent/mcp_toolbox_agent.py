@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import sys
 import asyncio
 from aiohttp.client_exceptions import ServerDisconnectedError
 from dotenv import load_dotenv
@@ -8,6 +9,10 @@ from google.genai.types import Content, Part
 from google.adk.agents import Agent
 from google.adk.sessions import InMemorySessionService
 from google.adk.runners import Runner
+
+# Add the parent directory to Python path to import tools
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from tools.query_refiner import query_refiner
 
 load_dotenv()
 
@@ -48,19 +53,35 @@ async def interaction_loop(runner: Runner):
 async def build_runner_and_client():
     client = ToolboxClient(MCP_URL)
     await client.__aenter__()
-    tools = await client.load_toolset()
+    toolbox_tools = await client.load_toolset()
+
     session = InMemorySessionService()
     await session.create_session(app_name=APP_NAME, user_id=USER_ID, session_id=SESSION_ID, state={})
+    
+    # Combine custom tools with toolbox tools
+    all_tools = [query_refiner]
+    if isinstance(toolbox_tools, list):
+        all_tools.extend(toolbox_tools)
+    else:
+        all_tools.append(toolbox_tools)
+    
     agent = Agent(
         name=APP_NAME,
         model=get_llm(),
-        tools=tools,
+        tools=all_tools,
         instruction=(
-            "You are a multi-DB text-to-SQL agent. Use only these tools: "
-            "<db_key>_list_tables, <db_key>_describe_table, <db_key>_execute_query. "
-            "Always inspect schema before executing querying, first get all correct table names and column names as per the schema, then use those to construct your SQL queries. "
-            "avoid raw user-provided SQL."
-            'Wrap column names and table names with commas e.g Album should become "Album"'
+            """
+            #Introduction
+            You are a multi-DB text-to-SQL agent. Use only these tools:
+            <db_key>_list_tables, <db_key>_describe_table, <db_key>_execute_query, query_refiner
+
+            # Steps
+            1. If you can't figure out which DB the question is about, ask the user to clarify. 
+            2. Identify the database type from the or context.
+            3. Always inspect schema before executing querying.
+            4. First get all correct table names and column names as per the schema, then use those to construct your SQL queries. 
+            5. Use the `query_refiner` tool to wrap table and column names with appropriate delimiters based on the database type.
+            """
         )
     )
     runner = Runner(app_name=APP_NAME, agent=agent, session_service=session)

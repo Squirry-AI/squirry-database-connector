@@ -1,12 +1,38 @@
 sources:
+  Customer:
+    database: classicmodels
+    host: localhost
+    kind: mysql
+    password: ${DB_PASSWORD_MYSQL}
+    port: 3306
+    user: root
   chinook:
     database: chinook
     host: localhost
     kind: postgres
-    password: ${DB_PASSWORD}
+    password: ${DB_PASSWORD_POSTGRES}
     port: 5432
-    user: awaiskamran
+    user: root
 tools:
+  Customer_describe_table:
+    description: Describe columns in a table of Customer
+    kind: mysql-sql
+    parameters:
+    - description: Name of table to inspect
+      name: table
+      type: string
+    source: Customer
+    statement: SELECT column_name, data_type FROM information_schema.columns WHERE
+      table_name = ?;
+  Customer_execute_query:
+    description: Execute arbitrary SQL on Customer within the 'sql' parameter
+    kind: mysql-execute-sql
+    source: Customer
+  Customer_list_tables:
+    description: List tables in Customer
+    kind: mysql-sql
+    source: Customer
+    statement: SHOW TABLES;
   chinook_describe_table:
     description: Describe columns in a table of chinook
     kind: postgres-sql
@@ -27,6 +53,10 @@ tools:
     source: chinook
     statement: SELECT table_name FROM information_schema.tables WHERE table_schema='public';
 toolsets:
+  Customer_toolset:
+  - Customer_list_tables
+  - Customer_describe_table
+  - Customer_execute_query
   chinook_toolset:
   - chinook_list_tables
   - chinook_describe_table

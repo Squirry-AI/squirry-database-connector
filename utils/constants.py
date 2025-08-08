@@ -2,6 +2,7 @@
 
 POSTGRES = "postgres"
 MYSQL = "mysql"
+SQLITE = "sqlite"
 
 POSTGRES_URL_PREFIX = "postgresql://"
 MYSQL_URL_PREFIX = "mysql://"

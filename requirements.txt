@@ -1,4 +1,8 @@
-python-dotenv==1.0.0
-SQLAlchemy==2.0.23
+aiohttp
+google-adk
+google-generativeai
+psycopg2-binary
 pymysql==1.1.0
-yaml
+python-dotenv==1.0.0
+PyYAML
+SQLAlchemy>=2.0.42
