@@ -108,8 +108,8 @@ if __name__ == "__main__":
     # )
 
     # Register SQLite database
-    register_database(
-        os.getenv("TOOLS_YAML_PATH"),
-        os.getenv("DB_KEY_SQLITE"),
-        os.getenv("CONNECTION_URL_SQLITE")
-    )
+    # register_database(
+    #     os.getenv("TOOLS_YAML_PATH"),
+    #     os.getenv("DB_KEY_SQLITE"),
+    #     os.getenv("CONNECTION_URL_SQLITE")
+    # )
