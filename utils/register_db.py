@@ -7,7 +7,7 @@ from sqlalchemy.engine import make_url
 from pathlib import Path
 from dotenv import load_dotenv
 from helpers import get_describe_table_statement, get_list_tables_statement, get_password_environment_variable, infer_kind_from_url, infer_port, normalize_url
-from constants import POSTGRES
+from constants import MYSQL, POSTGRES, ParameterTypes
 
 load_dotenv()
 
@@ -27,13 +27,14 @@ def register_database(tools_yaml_path: str, db_key: str, connection_url: str):
     # Build source config
     source_config = {
         "kind": kind,
-        "host": parsed.host,
-        "port": port,
         "database": parsed.database,
-        "user": parsed.username,
     }
     
-    source_config["password"] = f"{get_password_environment_variable(kind)}"
+    if kind in [POSTGRES, MYSQL]:
+        source_config["port"] = port
+        source_config["host"] = parsed.host
+        source_config["user"] = parsed.username
+        source_config["password"] = f"{get_password_environment_variable(kind)}"
     
     config.setdefault("sources", {})[db_key] = source_config
 
@@ -49,7 +50,7 @@ def register_database(tools_yaml_path: str, db_key: str, connection_url: str):
         "kind": f"{kind}-sql",
         "source": db_key,
         "description": f"Describe columns in a table of {db_key}",
-        "parameters": [
+        ParameterTypes[kind]: [
             {
                 "name": "table",
                 "type": "string",
@@ -59,11 +60,27 @@ def register_database(tools_yaml_path: str, db_key: str, connection_url: str):
         "statement": get_describe_table_statement(kind)
     }
 
-    cfg_tools[f"{db_key}_execute_query"] = {
-        "kind": f"{kind}-execute-sql",
-        "source": db_key,
-        "description": f"Execute arbitrary SQL on {db_key} within the 'sql' parameter"
-    }
+    if kind in [POSTGRES, MYSQL]:
+        cfg_tools[f"{db_key}_execute_query"] = {
+            "kind": f"{kind}-execute-sql",
+            "source": db_key,
+            "description": f"Execute arbitrary SQL on {db_key} within the 'sql' parameter"
+        }
+    else:
+        cfg_tools[f"{db_key}_execute_query"] = {
+            "kind": f"{kind}-sql",
+            "source": db_key,
+            "description": f"Execute arbitrary SQL on {db_key} within the 'sql' parameter",
+            ParameterTypes[kind]: [
+                {
+                    "name": "sql",
+                    "type": "string",
+                    "description": "SQL query to execute"
+                }
+            ],
+            "statement": "{{.sql}};"
+        }
+        
 
     toolsets = config.setdefault("toolsets", {})
     toolsets[f"{db_key}_toolset"] = [
@@ -77,11 +94,11 @@ def register_database(tools_yaml_path: str, db_key: str, connection_url: str):
 
 if __name__ == "__main__":
     # Register PostgreSQL database
-    register_database(
-        os.getenv("TOOLS_YAML_PATH"),
-        os.getenv("DB_KEY_POSTGRES"),
-        os.getenv("CONNECTION_URL_POSTGRES")
-    )
+    # register_database(
+    #     os.getenv("TOOLS_YAML_PATH"),
+    #     os.getenv("DB_KEY_POSTGRES"),
+    #     os.getenv("CONNECTION_URL_POSTGRES")
+    # )
 
     # Register MySQL database
     # register_database(
@@ -89,3 +106,10 @@ if __name__ == "__main__":
     #     os.getenv("DB_KEY_MYSQL"),
     #     os.getenv("CONNECTION_URL_MYSQL")
     # )
+
+    # Register SQLite database
+    register_database(
+        os.getenv("TOOLS_YAML_PATH"),
+        os.getenv("DB_KEY_SQLITE"),
+        os.getenv("CONNECTION_URL_SQLITE")
+    )

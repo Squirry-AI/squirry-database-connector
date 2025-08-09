@@ -15,7 +15,7 @@ def infer_kind_from_url(url: str) -> str:
         return POSTGRES
     if url.startswith(MYSQL_URL_PREFIX) or url.startswith("mysql+pymysql://"):
         return MYSQL
-    if url.startswith("sqlite://"):
+    if url.startswith("file:") or url.startswith("sqlite://"):
         return "sqlite"
     raise ValueError(f"Unsupported DB dialect in URL: {url}")
 
@@ -63,6 +63,10 @@ def get_describe_table_statement(kind: str) -> str:
             "FROM information_schema.columns "
             "WHERE table_name = ?;"
         )
+    if kind == SQLITE:
+        return (
+            "PRAGMA table_info({{.table}});"
+        )
     raise ValueError(f"Unsupported DB kind for describe table: {kind}")
 
 def get_list_tables_statement(kind: str) -> str:
@@ -76,5 +80,10 @@ def get_list_tables_statement(kind: str) -> str:
     if kind == MYSQL:
         return (
             "SHOW TABLES;"
+        )
+    if kind == SQLITE:
+        return (
+            "SELECT name FROM sqlite_master "
+            "WHERE type='table';"
         )
     raise ValueError(f"Unsupported DB kind for list tables: {kind}")
