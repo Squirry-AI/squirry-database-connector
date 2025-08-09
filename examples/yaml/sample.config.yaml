@@ -5,14 +5,17 @@ sources:
     kind: mysql
     password: ${DB_PASSWORD_MYSQL}
     port: 3306
-    user: ${DB_USER_MYSQL}
+    user: root
   chinook:
     database: chinook
     host: localhost
     kind: postgres
     password: ${DB_PASSWORD_POSTGRES}
     port: 5432
-    user: ${DB_USER_POSTGRES}
+    user: root
+  superheroes:
+    kind: "sqlite"
+    database: "/Users/awaiskamran/downloads/superheroes.db"
 tools:
   Customer_describe_table:
     description: Describe columns in a table of Customer
@@ -22,7 +25,8 @@ tools:
       name: table
       type: string
     source: Customer
-    statement: SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ?;
+    statement: SELECT column_name, data_type FROM information_schema.columns WHERE
+      table_name = ?;
   Customer_execute_query:
     description: Execute arbitrary SQL on Customer within the 'sql' parameter
     kind: mysql-execute-sql
@@ -31,7 +35,7 @@ tools:
     description: List tables in Customer
     kind: mysql-sql
     source: Customer
-    statement: show tables;
+    statement: SHOW TABLES;
   chinook_describe_table:
     description: Describe columns in a table of chinook
     kind: postgres-sql
@@ -40,7 +44,8 @@ tools:
       name: table
       type: string
     source: chinook
-    statement: SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1;
+    statement: SELECT column_name, data_type FROM information_schema.columns WHERE
+      table_name = $1;
   chinook_execute_query:
     description: Execute arbitrary SQL on chinook within the 'sql' parameter
     kind: postgres-execute-sql
@@ -50,6 +55,15 @@ tools:
     kind: postgres-sql
     source: chinook
     statement: SELECT table_name FROM information_schema.tables WHERE table_schema='public';
+  superheroes-list-table:
+    kind: "sqlite-sql"
+    source: superheroes
+    description: List all rows from a specific table
+    templateParameters:
+      - name: tableName
+        type: string
+        description: Table to select from
+    statement: SELECT * FROM {{.tableName}}; 
 toolsets:
   Customer_toolset:
   - Customer_list_tables
@@ -59,3 +73,5 @@ toolsets:
   - chinook_list_tables
   - chinook_describe_table
   - chinook_execute_query
+  superheroes_toolset:
+  - superheroes-list-table

@@ -1,0 +1,17 @@
+sources:
+  superheroes:
+    kind: "sqlite"
+    database: "/Users/awaiskamran/downloads/superheroes.db"
+tools:
+  superheroes-list-table:
+    kind: "sqlite-sql"
+    source: superheroes
+    description: List all rows from a specific table
+    templateParameters:
+      - name: tableName
+        type: string
+        description: Table to select from
+    statement: SELECT * FROM {{.tableName}}; 
+toolsets:
+  superheroes_toolset:
+  - superheroes-list-table

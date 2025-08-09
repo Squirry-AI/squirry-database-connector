@@ -13,6 +13,9 @@ sources:
     password: ${DB_PASSWORD_POSTGRES}
     port: 5432
     user: root
+  superheroes:
+    kind: "sqlite"
+    database: "/Users/awaiskamran/downloads/superheroes.db"
 tools:
   Customer_describe_table:
     description: Describe columns in a table of Customer
@@ -52,6 +55,15 @@ tools:
     kind: postgres-sql
     source: chinook
     statement: SELECT table_name FROM information_schema.tables WHERE table_schema='public';
+  superheroes-list-table:
+    kind: "sqlite-sql"
+    source: superheroes
+    description: List all rows from a specific table
+    templateParameters:
+      - name: tableName
+        type: string
+        description: Table to select from
+    statement: SELECT * FROM {{.tableName}}; 
 toolsets:
   Customer_toolset:
   - Customer_list_tables
@@ -61,3 +73,5 @@ toolsets:
   - chinook_list_tables
   - chinook_describe_table
   - chinook_execute_query
+  superheroes_toolset:
+  - superheroes-list-table
