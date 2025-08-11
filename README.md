@@ -1,5 +1,5 @@
 # Squirry DB Connector Agent
-<img width="2240" height="1260" alt="Black and White Modern Minimalist Planter YouTube Banner (1)" src="https://github.com/user-attachments/assets/12315d3a-7680-4f4d-9844-634facab6fc5" />
+<img width="2240" height="1260" alt="Black and White Modern Minimalist Planter YouTube Banner (2)" src="https://github.com/user-attachments/assets/1849b02f-25c5-4350-9cac-f4536162954c" />
 
 
 ## Introduction
