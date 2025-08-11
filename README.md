@@ -1,7 +1,8 @@
 # Squirry DB Connector Agent
-<img width="1920" height="1080" alt="Copy of Copy of Copy of Untitled Design (1)" src="https://github.com/user-attachments/assets/7d9669da-6ad5-49cb-96db-4afc575e6736" />
+<img width="2240" height="1260" alt="Black and White Modern Minimalist Planter YouTube Banner (1)" src="https://github.com/user-attachments/assets/12315d3a-7680-4f4d-9844-634facab6fc5" />
 
 
+## Introduction
 This project provides a dynamic agent capable of connecting to multiple databases (PostgreSQL, MySQL, SQLite) and converting natural language text into SQL queries. It uses a configuration-driven approach to dynamically select and connect to the desired database.
 
 ## Features
