@@ -5,7 +5,7 @@
 This project provides a dynamic agent capable of connecting to multiple databases (PostgreSQL, MySQL, SQLite) and converting natural language text into SQL queries. It uses a configuration-driven approach to dynamically select and connect to the desired database.
 
 ## Architecture Diagram
-<img width="794" height="352" alt="diagram-export-11-08-2025-13_31_50" src="https://github.com/user-attachments/assets/71be880a-dea0-46ef-8eda-e2a4e95d805b" />
+<img width="794" height="352" alt="Untitled design" src="https://github.com/user-attachments/assets/18d9f4b4-204d-4634-ab41-829be736fee1" />
 
 ## Features
 
