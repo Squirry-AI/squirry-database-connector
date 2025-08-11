@@ -147,7 +147,7 @@ To run the agent, you would typically execute a main Python script. The exact co
 
 2. Run the register_db.py with your configured DB parameters:
     ```bash
-        python utils/register_db.py 
+    python utils/register_db.py 
     ```    
 
 3. Run the toolbox server:
