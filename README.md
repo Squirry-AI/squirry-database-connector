@@ -79,7 +79,7 @@ tools:
 ./toolbox --tools-file "tools.yaml"
 ```
 
-#### Run on MacOS & Linux:
+#### If installed via Homebrew on macOS/Linux:
 ```bash
 toolbox --tools-file "tools.yaml"
 ```
@@ -139,12 +139,29 @@ To run the agent, you would typically execute a main Python script. The exact co
 
 1.  Ensure your `.env` file is configured correctly. For instance, to use the PostgreSQL database defined in `config.yaml`. the `.env.example` contains all the environment variables you can
 
+
 2. Run the register_db.py with your configured DB parameters:
     ```bash
         python utils/register_db.py 
     ```    
+
+3. Run the toolbox server:
+    #### Run on MacOS & Linux:
+    ```bash
+    ./toolbox --tools-file "tools.yaml"
+    ```
+
+    #### If installed via Homebrew on macOS/Linux:
+    ```bash
+    toolbox --tools-file "tools.yaml"
+    ```
+
+    ### Run on Windows (PowerShell or CMD):
+    ```bash
+    .\toolbox.exe --tools-file "tools.yaml"
+    ``` 
      
-3. Run the MCP based agent to query in natural language:
+4. Run the MCP based agent to query in natural language:
     ```bash
     python agent/mcp_toolbox_agent.py 
     ```
