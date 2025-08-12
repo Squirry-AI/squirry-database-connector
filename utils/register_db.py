@@ -3,13 +3,12 @@
 import logging
 import yaml
 import os
-import logger
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.engine import make_url
 from pathlib import Path
 from dotenv import load_dotenv
-from helpers import get_describe_table_statement, get_list_tables_statement, get_password_environment_variable, infer_kind_from_url, infer_port, normalize_url
-from constants import MYSQL, POSTGRES, ParameterTypes
+from .helpers import get_describe_table_statement, get_list_tables_statement, get_password_environment_variable, infer_kind_from_url, infer_port, normalize_url
+from .constants import MYSQL, POSTGRES, ParameterTypes
 
 load_dotenv()
 logger = logging.getLogger(__name__)

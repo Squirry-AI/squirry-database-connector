@@ -1,6 +1,6 @@
 # utils/db/helpers.py
 
-from constants import (
+from .constants import (
     POSTGRES,
     MYSQL,
     POSTGRES_URL_PREFIX,
