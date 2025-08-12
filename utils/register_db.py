@@ -1,7 +1,9 @@
 # register_db.py
 
+import logging
 import yaml
 import os
+import logger
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.engine import make_url
 from pathlib import Path
@@ -10,8 +12,9 @@ from helpers import get_describe_table_statement, get_list_tables_statement, get
 from constants import MYSQL, POSTGRES, ParameterTypes
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
-def register_database(tools_yaml_path: str, db_key: str, connection_url: str):
+def register_database(tools_yaml_path: str, db_key: str, connection_url: str) -> list[str]:
     connection_url = normalize_url(connection_url)
     engine = create_engine(connection_url)
     inspector = inspect(engine)
@@ -90,7 +93,8 @@ def register_database(tools_yaml_path: str, db_key: str, connection_url: str):
     ]
 
     tools_yaml.write_text(yaml.safe_dump(config))
-    print(f"Registered '{db_key}' successfully; found tables: {tables}")
+    logger.info(f"Registered '{db_key}' successfully; found tables: {tables}")  # Keep print for CLI use
+    return tables
 
 if __name__ == "__main__":
     # Register PostgreSQL database
@@ -108,8 +112,8 @@ if __name__ == "__main__":
     # )
 
     # Register SQLite database
-    # register_database(
-    #     os.getenv("TOOLS_YAML_PATH"),
-    #     os.getenv("DB_KEY_SQLITE"),
-    #     os.getenv("CONNECTION_URL_SQLITE")
-    # )
+    register_database(
+        os.getenv("TOOLS_YAML_PATH"),
+        os.getenv("DB_KEY_SQLITE"),
+        os.getenv("CONNECTION_URL_SQLITE")
+    )
